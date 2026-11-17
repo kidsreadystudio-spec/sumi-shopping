@@ -279,7 +279,15 @@ function setB(t){curLine=t;const b=$("bubble"),cs=getComputedStyle(b);
     let lo=8,hi=maxF;for(let k=0;k<12;k++){const m=(lo+hi)/2;b.style.fontSize=m+"px";if(w.offsetHeight<=H&&[...w.children].every(s=>s.offsetWidth<=W))lo=m;else hi=m}return lo}
   let best=null,bf=0;for(let mask=0;mask<(1<<Math.max(0,n-1));mask++){const lines=[];let cur=P2[0];
     for(let i=1;i<n;i++){if(mask&(1<<(i-1))){lines.push(cur);cur=P2[i]}else cur+=P2[i]}lines.push(cur);if(lines.length>3)continue;const f=fit(lines);if(f>bf+.5){bf=f;best=lines}}
-  fit(best||P2);b.style.fontSize=bf+"px"}
+  fit(best||P2);b.style.fontSize=bf+"px";
+  /* 保險：若任何一行仍超出框，逐步縮小直到放得下 */
+  const w=b.firstChild;let fs=bf;for(let k=0;k<30&&w&&(w.offsetHeight>H||[...w.children].some(s=>s.offsetWidth>W));k++){fs*=.96;b.style.fontSize=fs+"px"}
+  bSize=b.offsetWidth+"x"+b.offsetHeight}
+/* 螢幕旋轉、視窗大小改變、字型晚載入時，重新排版對話框 */
+let bSize="",bRz=0;
+function reB(){cancelAnimationFrame(bRz);bRz=requestAnimationFrame(()=>{const b=$("bubble");if(!b||!curLine)return;if(b.offsetWidth+"x"+b.offsetHeight!==bSize)setB(curLine)})}
+try{new ResizeObserver(reB).observe($("bubble"))}catch(e){}
+addEventListener("resize",reB);addEventListener("orientationchange",()=>setTimeout(()=>{bSize="";reB()},300));
 
 try{document.fonts.ready.then(()=>{if(curLine)setB(curLine)});document.fonts.addEventListener("loadingdone",()=>{if(curLine)setB(curLine)})}catch(e){}
 /* ---------- 聲音 ---------- */
