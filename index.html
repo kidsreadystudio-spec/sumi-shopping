@@ -62,6 +62,24 @@ h1{left:50%;top:1.6%;transform:translateX(-50%);margin:0;padding:1.4cqw 6cqw;bor
 #listCard .front{background:#FFFDF2;border:.8cqw solid #D9B98F;box-shadow:0 1.2cqw 0 #D9B98F}
 #listCard .back{background:repeating-linear-gradient(45deg,#F6C37B 0 3cqw,#F2B35F 3cqw 6cqw);border:.8cqw solid #fff;transform:rotateY(180deg);font-size:10cqw;color:#fff;font-weight:700;text-shadow:0 .6cqw 0 #D98E3A}
 #listCard.hide .front{transform:rotateY(-180deg)}#listCard.hide .back{transform:rotateY(0)}
+/* 第 2 關「要買」說完後蓋起來 */
+#target>*{transition:opacity .25s}
+#target.hide>*{opacity:0!important}
+#target::after{content:"？";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:3.4cqw;background:repeating-linear-gradient(45deg,#F6C37B 0 3cqw,#F2B35F 3cqw 6cqw);color:#fff;font-size:10cqw;font-weight:700;text-shadow:0 .6cqw 0 #D98E3A;opacity:0;pointer-events:none;transition:opacity .25s}
+#target.hide::after{opacity:1}
+/* 第 2 關分區：固定格子大小，名稱在上、貨架圖在下，一定在畫面內 */
+#map{grid-template-rows:1fr 1fr;align-items:stretch}
+.zb.zimg{position:relative;min-height:0;min-width:0;height:100%;width:100%;overflow:hidden;display:block;background:#fff!important;border:1.2cqw solid #fff!important;border-radius:5cqw;box-shadow:0 1.6cqw 0 rgba(107,74,51,.25)!important;box-sizing:border-box}
+.zb.zimg .zlab{position:absolute;left:0;right:0;top:0;height:18%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:7cqw;font-weight:700;letter-spacing:.06em;text-shadow:0 .4cqw 0 rgba(0,0,0,.18);border-radius:3.8cqw 3.8cqw 0 0}
+.zb.zimg img{position:absolute;left:0;right:0;bottom:0;top:18%;width:100%!important;height:82%!important;max-width:none!important;object-fit:cover;object-position:50% 40%;border:none!important;border-radius:0 0 3.8cqw 3.8cqw!important;box-shadow:none!important;background:none!important}
+/* 清單改成淡入淡出（iPad Safari 的 3D 翻牌會讓圖片跑出框外）*/
+#listCard{perspective:none}
+#listCard .face{transform:none!important;backface-visibility:visible;-webkit-backface-visibility:visible;transition:opacity .25s ease,visibility 0s linear 0s;overflow:hidden}
+#listCard .back{opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s}
+#listCard.hide .front{opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s}
+#listCard.hide .back{opacity:1;visibility:visible;transition:opacity .25s ease,visibility 0s linear 0s}
+#listFront .li{height:84%;justify-content:center}
+#listFront .li .ci{height:100%!important;width:auto;max-height:100%;animation:none;filter:none}
 .li{display:flex;flex-direction:column;align-items:center;font-size:3.4cqw;font-weight:700;position:relative}
 .li .em{font-size:9.5cqw;line-height:1.1}
 .li .x2{position:absolute;right:-2.4cqw;top:-1cqw;background:var(--coral);color:#fff;border-radius:999px;font-size:3.4cqw;padding:0 1.4cqw}
@@ -376,7 +394,7 @@ function showL1(){const Q=L1Q[q],id=++run;showOnly(["L1","shelf1","cart"]);place
   const others=shuffle(Object.keys(P).filter(k=>!keys.includes(k))).slice(0,6-keys.length);
   buildShelf(shuffle([...keys,...others]),dropL1);
   peekList(true);setB(Q.ask);busy=true;
-  say(Q.ask,()=>{if(id!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false;setB("記住了嗎？把它們放進購物車吧！");say(curLine)},2600)})}
+  say(Q.ask,()=>{if(id!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false;setB("記住了嗎？把它們放進購物車吧！");say(curLine)},1200)})}
 function peekList(open){$("listCard").classList.toggle("hide",!open)}
 function dropL1(z,k,el){if(z!=="cart")return false;const Q=L1Q[q],need=Q.list[k]||0,have=L1got[k]||0;
   if(have<need){L1got[k]=have+1;addToCart(k);say(nm(k)+"！");
@@ -385,12 +403,12 @@ function dropL1(z,k,el){if(z!=="cart")return false;const Q=L1Q[q],need=Q.list[k]
     return true}
   miss++;el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
   if(need&&have>=need){confused("這個已經夠了喔！");say("這個已經夠了喔！")}else{confused("清單上有這個嗎？");say("清單上有這個嗎？再想一想。")}
-  if(miss>=2){peekList(true);clearTimeout(L1timer);L1timer=setTimeout(()=>peekList(false),2500)}
+  if(miss>=2){peekList(true);clearTimeout(L1timer);L1timer=setTimeout(()=>peekList(false),1500)}
   return false}
 
 /* ---------- 第 2 關：找到貨架 ---------- */
 function showL2(){const Q=L2Q[q],id=++run;showOnly(["L2map"]);
-  $("map").innerHTML=Object.entries(ZONES).map(([z,v])=>`<button class="zb zimg" data-z="${z}" aria-label="${v[0]}"><img src="${IMG["z-"+z]}" alt="${v[0]}"></button>`).join("");
+  $("map").innerHTML=Object.entries(ZONES).map(([z,v])=>`<button class="zb zimg" data-z="${z}" aria-label="${v[0]}"><span class="zlab" style="background:${v[1]}">${v[0]}</span><img src="${IMG["z-"+z]}" alt="${v[0]}"></button>`).join("");
   $("map").querySelectorAll(".zb").forEach(b=>b.onclick=()=>pickZone(b));
   const t=Q.ks.length===1?`蘇米要買${nm(Q.ks[0])}，${nm(Q.ks[0])}在哪一區呢？`:`蘇米要買${andList(Q.ks)}，它們在哪一區呢？`;setB(t);say(t)}
 function pickZone(b){if(busy)return;ac();const Q=L2Q[q],right=P[Q.ks[0]][2];
@@ -401,15 +419,15 @@ let L2got={};
 function enterZone(){const Q=L2Q[q],z=P[Q.ks[0]][2];busy=false;miss=0;L2got={};showOnly(["target","shelf1","cart"]);placeCart(36,25);
   $("target").innerHTML=Q.ks.length===1?`要買：${em(Q.ks[0])}${nm(Q.ks[0])}`:`要買：${Q.ks.map(k=>`<span class="ti" data-k="${k}">${em(k)}</span>`).join("")}`;
   let keys=Object.keys(P).filter(k=>P[k][2]===z&&!Q.ks.includes(k)&&k!==Q.sim);keys=[...Q.ks,...(Q.sim?[Q.sim]:[]),...shuffle(keys)].slice(0,6);
-  buildShelf(shuffle(keys),dropL2);setB(Q.ks.length===1?`找到${nm(Q.ks[0])}，把它拉進購物車。`:`找到${andList(Q.ks)}，把它們拉進購物車。`);say(curLine)}
+  buildShelf(shuffle(keys),dropL2);$("target").classList.remove("hide");setB(Q.ks.length===1?`找到${nm(Q.ks[0])}，把它拉進購物車。`:`找到${andList(Q.ks)}，把它們拉進購物車。`);const zid=run;busy=true;say(curLine,()=>{if(zid!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(zid!==run)return;$("target").classList.add("hide");busy=false},1000)})}
 function dropL2(zid,k,el){if(zid!=="cart")return false;const Q=L2Q[q];
   if(Q.ks.includes(k)&&!L2got[k]){L2got[k]=1;addToCart(k);$("target").querySelector(`[data-k="${k}"]`)?.classList.add("got");
-    if(Q.ks.every(x=>L2got[x])){busy=true;const id=++run;say(nm(k)+"！");cheer(Q.ks.length>1?"都找到了！":"找到了！",()=>{if(id===run)next()})}else say(nm(k)+"！");
+    if(Q.ks.every(x=>L2got[x])){busy=true;clearTimeout(L1timer);$("target").classList.remove("hide");const id=++run;say(nm(k)+"！");cheer(Q.ks.length>1?"都找到了！":"找到了！",()=>{if(id===run)next()})}else say(nm(k)+"！");
     return true}
   if(Q.ks.includes(k)){confused("這個已經夠了喔！");say("這個已經夠了喔！");return false}
   miss++;el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
   if(k===Q.sim){confused("長得好像！再仔細看看。");say("咦，這是"+nm(k)+"，長得好像！再仔細看看。")}else{confused("不是這個喔！");say("這是"+nm(k)+"喔，再找一找。")}
-  if(miss>=2){const g=Q.ks.find(x=>!L2got[x]);$("shelf1").querySelector(`[data-k="${g}"]`)?.classList.add("glow")}return false}
+  if(miss>=2){$("target").classList.remove("hide");clearTimeout(L1timer);L1timer=setTimeout(()=>$("target").classList.add("hide"),1500);const g=Q.ks.find(x=>!L2got[x]);$("shelf1").querySelector(`[data-k="${g}"]`)?.classList.add("glow")}return false}
 
 /* ---------- 第 3 關：付錢結帳 ---------- */
 function coinEl(v){const c=document.createElement("div");c.className="coin c"+v;c.dataset.v=v;c.textContent=v;
@@ -438,7 +456,8 @@ document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{ac();start(+b.d
 $("back").onclick=()=>{run++;try{speechSynthesis.cancel()}catch(e){}$("end").hidden=true;$("menu").hidden=false};
 $("sound").onclick=()=>{soundOn=!soundOn;$("mute").hidden=soundOn;if(!soundOn)try{speechSynthesis.cancel()}catch(e){}};
 $("relisten").onclick=e=>{e.stopPropagation();if(!curLine)return;
-  if(L===0&&!$("L1").hidden&&!busy){const Q=L1Q[q];peekList(true);setB(Q.ask);clearTimeout(L1timer);busy=true;const id=run;say(Q.ask,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false},2000)})}
+  if(L===0&&!$("L1").hidden&&!busy){const Q=L1Q[q];peekList(true);setB(Q.ask);clearTimeout(L1timer);busy=true;const id=run;say(Q.ask,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false},1000)})}
+  else if(L===1&&!$("target").hidden&&!busy){$("target").classList.remove("hide");clearTimeout(L1timer);busy=true;const id=run;say(curLine,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;$("target").classList.add("hide");busy=false},1000)})}
   else say(curLine)};
 const R=document.documentElement.style;R.setProperty("--bgimg",`url(${IMG.store})`);R.setProperty("--cartimg",`url(${IMG.cart})`);R.setProperty("--counterimg",`url(${IMG.counter})`);
 $("logoImg").src=LOGO;$("heroImg").src=IMG["sumi-idle"];$("peek").src=IMG["sumi-idle"];
