@@ -484,6 +484,13 @@ $("logoImg").src=LOGO;$("heroImg").src=IMG["sumi-idle"];$("peek").src=IMG["sumi-
 })();
 </script>
 
-<script>if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+<script>
+/* 自動更新：每次打開或回到遊戲，都去網站比對版本，有新版就重新載入 */
+const APPV="1795513093";
+function chkVer(){fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.text():"").then(v=>{v=(v||"").trim();
+  if(v&&v!==APPV){try{caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).finally(()=>location.replace(location.pathname+"?v="+v))}catch(e){location.replace(location.pathname+"?v="+v)}}}).catch(()=>{})}
+chkVer();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkVer()});addEventListener("pageshow",e=>{if(e.persisted)chkVer()});
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}))}
+</script>
 </body>
 </html>
