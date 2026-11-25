@@ -334,7 +334,7 @@ function say(text,cb){let done=false;const go=()=>{if(!done){done=true;cb&&cb()}
   if(!o){ttsSay(text,go);return}
   const play=(n)=>{if(tok!==vTok)return;if(!VBUF[o[0]]){if(!n)loadV(o[0]).then(()=>play(1));return}
     try{if(!VURL[text])VURL[text]=URL.createObjectURL(new Blob([new Uint8Array(VBUF[o[0]],o[1],o[2])],{type:"audio/mpeg"}));
-      voxEl.onended=()=>{if(tok===vTok)setTimeout(go,350)};voxEl.src=VURL[text];voxEl.currentTime=0;
+      voxEl.onended=()=>{if(tok===vTok)setTimeout(go,80)};voxEl.src=VURL[text];voxEl.currentTime=0;
       voxEl.play().catch(err=>{if(err&&err.name==="AbortError")return;if(tok===vTok)setTimeout(()=>{if(tok===vTok)voxEl.play().catch(()=>{})},250)})}catch(e){}};
   if(VBUF[o[0]])play();else loadV(o[0]).then(play)}
 let AC=null;function ac(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}return AC}
@@ -401,7 +401,7 @@ function showL1(){const Q=L1Q[q],id=++run;showOnly(["L1","shelf1","cart"]);place
   const others=shuffle(Object.keys(P).filter(k=>!keys.includes(k))).slice(0,6-keys.length);
   buildShelf(shuffle([...keys,...others]),dropL1);
   peekList(true);setB(Q.ask);busy=true;
-  say(Q.ask,()=>{if(id!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false;setB("記住了嗎？把它們放進購物車吧！");say(curLine)},1200)})}
+  say(Q.ask,()=>{if(id!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false;setB("記住了嗎？把它們放進購物車吧！");say(curLine)},0)})}
 function peekList(open){$("listCard").classList.toggle("hide",!open)}
 function dropL1(z,k,el){if(z!=="cart")return false;const Q=L1Q[q],need=Q.list[k]||0,have=L1got[k]||0;
   if(have<need){L1got[k]=have+1;addToCart(k);say(nm(k)+"！");
@@ -426,7 +426,7 @@ let L2got={};
 function enterZone(){const Q=L2Q[q],z=P[Q.ks[0]][2];busy=false;miss=0;L2got={};showOnly(["target","shelf1","cart"]);placeCart(36,25);
   $("target").innerHTML=Q.ks.length===1?`要買：${em(Q.ks[0])}${nm(Q.ks[0])}`:`要買：${Q.ks.map(k=>`<span class="ti" data-k="${k}">${em(k)}</span>`).join("")}`;
   let keys=Object.keys(P).filter(k=>P[k][2]===z&&!Q.ks.includes(k)&&k!==Q.sim);keys=[...Q.ks,...(Q.sim?[Q.sim]:[]),...shuffle(keys)].slice(0,6);
-  buildShelf(shuffle(keys),dropL2);$("target").classList.remove("hide");setB(Q.ks.length===1?`找到${nm(Q.ks[0])}，把它拉進購物車。`:`找到${andList(Q.ks)}，把它們拉進購物車。`);const zid=run;busy=true;say(curLine,()=>{if(zid!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(zid!==run)return;$("target").classList.add("hide");busy=false},1000)})}
+  buildShelf(shuffle(keys),dropL2);$("target").classList.remove("hide");setB(Q.ks.length===1?`找到${nm(Q.ks[0])}，把它拉進購物車。`:`找到${andList(Q.ks)}，把它們拉進購物車。`);const zid=run;busy=true;say(curLine,()=>{if(zid!==run)return;clearTimeout(L1timer);L1timer=setTimeout(()=>{if(zid!==run)return;$("target").classList.add("hide");busy=false},0)})}
 function dropL2(zid,k,el){if(zid!=="cart")return false;const Q=L2Q[q];
   if(Q.ks.includes(k)&&!L2got[k]){L2got[k]=1;addToCart(k);$("target").querySelector(`[data-k="${k}"]`)?.classList.add("got");
     if(Q.ks.every(x=>L2got[x])){busy=true;clearTimeout(L1timer);$("target").classList.remove("hide");const id=++run;say(nm(k)+"！");cheer(Q.ks.length>1?"都找到了！":"找到了！",()=>{if(id===run)next()})}else say(nm(k)+"！");
@@ -463,8 +463,8 @@ document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{ac();start(+b.d
 $("back").onclick=()=>{run++;try{speechSynthesis.cancel()}catch(e){}$("end").hidden=true;$("menu").hidden=false};
 $("sound").onclick=()=>{soundOn=!soundOn;$("mute").hidden=soundOn;if(!soundOn)try{speechSynthesis.cancel()}catch(e){}};
 $("relisten").onclick=e=>{e.stopPropagation();if(!curLine)return;
-  if(L===0&&!$("L1").hidden&&!busy){const Q=L1Q[q];peekList(true);setB(Q.ask);clearTimeout(L1timer);busy=true;const id=run;say(Q.ask,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false},1000)})}
-  else if(L===1&&!$("target").hidden&&!busy){$("target").classList.remove("hide");clearTimeout(L1timer);busy=true;const id=run;say(curLine,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;$("target").classList.add("hide");busy=false},1000)})}
+  if(L===0&&!$("L1").hidden&&!busy){const Q=L1Q[q];peekList(true);setB(Q.ask);clearTimeout(L1timer);busy=true;const id=run;say(Q.ask,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;peekList(false);busy=false},0)})}
+  else if(L===1&&!$("target").hidden&&!busy){$("target").classList.remove("hide");clearTimeout(L1timer);busy=true;const id=run;say(curLine,()=>{if(id!==run)return;L1timer=setTimeout(()=>{if(id!==run)return;$("target").classList.add("hide");busy=false},0)})}
   else say(curLine)};
 const R=document.documentElement.style;R.setProperty("--bgimg",`url(${IMG.store})`);R.setProperty("--cartimg",`url(${IMG.cart})`);R.setProperty("--counterimg",`url(${IMG.counter})`);
 $("logoImg").src=LOGO;$("heroImg").src=IMG["sumi-idle"];$("peek").src=IMG["sumi-idle"];
@@ -486,7 +486,7 @@ $("logoImg").src=LOGO;$("heroImg").src=IMG["sumi-idle"];$("peek").src=IMG["sumi-
 
 <script>
 /* 自動更新：每次打開或回到遊戲，都去網站比對版本，有新版就重新載入 */
-const APPV="1795513590";
+const APPV="1795589017";
 function chkVer(){fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.text():"").then(v=>{v=(v||"").trim();
   if(v&&v!==APPV){try{caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).finally(()=>location.replace(location.pathname+"?v="+v))}catch(e){location.replace(location.pathname+"?v="+v)}}}).catch(()=>{})}
 chkVer();document.addEventListener("visibilitychange",()=>{if(!document.hidden)chkVer()});addEventListener("pageshow",e=>{if(e.persisted)chkVer()});
